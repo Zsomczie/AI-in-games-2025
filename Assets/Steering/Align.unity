@@ -690,9 +690,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   character: {fileID: 0}
   ignorerotation: 0
-  target: {fileID: 0}
+  target: {fileID: 21648234}
   maxAngularAcceleration: 90
-  maxRotation: 45
+  maxRotationSpeed: 45
   targetRadius: 3
   slowRadius: 10
   timeToTarget: 0.1

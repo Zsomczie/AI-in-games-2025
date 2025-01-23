@@ -9,7 +9,7 @@ public class Align : BaseSteeringBehavior
 
 
     public float maxAngularAcceleration = 90f;
-    public float maxRotation = 45f;
+    public float maxRotationSpeed = 45f;
 
     public float targetRadius = 3.0f;
     public float slowRadius = 10f;
@@ -35,11 +35,11 @@ public class Align : BaseSteeringBehavior
             float targetRotation = 0;
             if (rotationSize>slowRadius) 
             {
-                targetRotation=maxRotation;
+                targetRotation=maxRotationSpeed;
             }
             else
             {
-                targetRotation=maxRotation*rotationSize/slowRadius;
+                targetRotation=maxRotationSpeed*rotationSize/slowRadius;
             }
             targetRotation *= rotation / rotationSize;
 
