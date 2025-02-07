@@ -8,7 +8,6 @@ public class DT_Node
     public virtual DT_Node GetBranch() {return null; }
     public virtual DT_Node MakeDecision() { return null; }
 }
-
 public class DT_Action : DT_Node 
 {
     public DT_Action_Init init;
