@@ -8,7 +8,8 @@ public enum AgentState
 {
     Idle,
     Chasing,
-    Partol
+    Partol,
+    Attacking
 }
 public class StateMachine : MonoBehaviour //Navigation Brain
 {
@@ -46,6 +47,10 @@ public class StateMachine : MonoBehaviour //Navigation Brain
             case AgentState.Partol:
                 Patrol();
                 break;
+
+                case AgentState.Attacking:
+                //playerhealth--;
+                break;
         }
     }
 
@@ -54,15 +59,11 @@ public class StateMachine : MonoBehaviour //Navigation Brain
         while (true)
         {
         int rand = Random.Range(0, 9);
-        if (rand>=0&&rand<4)
+        if (rand<5)
         {
             currentState = AgentState.Idle;
         }
-        else if (rand >= 4 && rand < 7)
-        {
-            currentState = AgentState.Chasing;
-        }
-        else if (rand >=7)
+        else if (rand >=5)
         {
             currentState = AgentState.Partol;
         }
