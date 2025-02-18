@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ActionTask : MonoBehaviour
+public class ActionTaskOld : MonoBehaviour
 {
     public virtual void Action() 
     {
@@ -26,7 +26,7 @@ public class Task : MonoBehaviour
     
 }
 
-public class MoveTask : ActionTask 
+public class MoveTask : ActionTaskOld 
 {
     
 }
