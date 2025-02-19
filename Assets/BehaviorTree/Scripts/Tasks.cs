@@ -27,19 +27,21 @@ public class Condition : ITask
 }
 public class PatrolTask : ITask
 {
-    Transform enemy;
-    NavMeshAgent agent;
-    List<Transform> patrolPoints;
-    float patrolSpeed;
-    int currentIndex=0;
+    readonly Transform enemy;
+    readonly NavMeshAgent agent;
+    AIDetection AIDetection;
+    readonly List<Transform> patrolPoints;
+    readonly float patrolSpeed;
+    int currentIndex;
     bool isPathCalculated;
 
-    public PatrolTask(Transform enemy, NavMeshAgent agent, List<Transform> patrolPoints, float patrolSpeed=2f)
+    public PatrolTask(Transform enemy, NavMeshAgent agent, AIDetection AIDetection, List<Transform> patrolPoints, float patrolSpeed=2f)
     {
         this.enemy = enemy;
         this.agent = agent;
         this.patrolPoints = patrolPoints;
         this.patrolSpeed = patrolSpeed;
+        this.AIDetection= AIDetection;
     }
 
     public BT_Node.Status Process() 
@@ -49,6 +51,10 @@ public class PatrolTask : ITask
         {
             return BT_Node.Status.Success;
         }
+        if (AIDetection.playerVisible)
+        {
+            return BT_Node.Status.Failure;
+        }
         var target = patrolPoints[currentIndex];
         agent.SetDestination(target.position);
 
@@ -56,6 +62,7 @@ public class PatrolTask : ITask
 
         if (isPathCalculated&&agent.remainingDistance<0.1f) 
         {
+            
             currentIndex++;
             //Debug.Log(currentIndex);
             isPathCalculated = false;

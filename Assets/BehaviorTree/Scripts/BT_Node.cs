@@ -1,6 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
+using System;
+using static UnityEditor.Progress;
 
 
 
@@ -8,15 +13,17 @@ public class BT_Node
 {
     public enum Status { Success, Failure, Running }
 
-    public string name;
+    public readonly string name;
+    public readonly int priority;
 
-    public List<BT_Node> children = new();
+    public  readonly List<BT_Node> children = new();
     protected int currentchild;
 
-    public BT_Node(string name = "Node") 
+    public BT_Node(string name = "Node", int priority = 0)
     {
         this.name = name;
-    }
+        this.priority = priority;
+     }
 
     public void AddChild(BT_Node child) 
     {
@@ -39,7 +46,7 @@ public class BT_Node
 }
 public class Selector : BT_Node
 {
-    public Selector(string name) : base(name) { }
+    public Selector(string name, int priority = 0) : base(name, priority) { }
 
     public override Status Process()
     {
@@ -67,9 +74,9 @@ public class Selector : BT_Node
 }
 public class Leaf : BT_Node 
 {
-    ITask strategy;
+    readonly ITask strategy;
 
-    public Leaf(string name, ITask strategy) : base(name)
+    public Leaf(string name, ITask strategy, int priority = 0) : base(name,priority)
     {
         this.strategy = strategy;
     }
@@ -105,7 +112,7 @@ public class BehaviorTree : BT_Node
 
 public class Sequence : BT_Node 
 {
-    public Sequence(string name) : base(name) { }
+    public Sequence(string name, int priority = 0) : base(name,priority) { }
 
     public override Status Process()
     {
@@ -129,7 +136,7 @@ public class Sequence : BT_Node
                     }
                     else
                     {
-                        return Status.Failure;
+                        return Status.Running;
                     }
             }
         }
@@ -138,6 +145,95 @@ public class Sequence : BT_Node
         return Status.Success;
     }
 }
+
+public class PrioritySelector : Selector 
+{
+    List<BT_Node> SortedChildren;
+    List<BT_Node> sortedChildrenReadOnly => SortedChildren ??= SortChildren();
+    protected virtual List<BT_Node> SortChildren() 
+    {
+        return children.OrderByDescending(x=>x.priority).ToList();
+    }
+
+    public PrioritySelector(string name,int priority=0) : base(name,priority) { }
+
+    public override void Reset() 
+    {
+        base.Reset();
+        SortedChildren = null;
+    }
+
+    public override Status Process()
+    {
+        foreach (var child in sortedChildrenReadOnly)
+        {
+            switch (child.Process())
+            {
+                case Status.Success:
+                    return Status.Success;
+                case Status.Running:
+                    return Status.Running;
+                default:
+                    continue;
+            }
+        }
+        return Status.Failure;
+    }
+}
+
+public class RandomSelector : PrioritySelector
+{
+    System.Random rnd = new System.Random();
+    protected override List<BT_Node> SortChildren()
+    {
+        return children.Select(x => new { value = x, order = rnd.Next() })
+            .OrderBy(x => x.order).Select(x => x.value).ToList();
+    }
+
+    public RandomSelector(string name, int priority =0) : base(name,priority) { }
+
+}
+
+public class Inverter : BT_Node 
+{
+    public Inverter(string name) : base(name) { }
+
+    public override Status Process()
+    {
+        switch (children[0].Process())
+        {
+            
+
+            case Status.Failure:
+                return Status.Success;
+
+            case Status.Running:
+                return Status.Running;
+
+            default:
+                return Status.Failure;
+        }
+    }
+}
+
+public class UntilFail : BT_Node 
+{
+    public UntilFail(string name) : base(name) { }
+
+    public override Status Process()
+    {
+        if (children[0].Process() == Status.Failure) 
+        {
+            Reset(); 
+            return Status.Failure;
+        }
+        return Status.Running;
+    }
+}
+
+//UntilSuccess
+
+//Repeat
 
 
 
