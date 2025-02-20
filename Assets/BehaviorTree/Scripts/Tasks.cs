@@ -23,15 +23,25 @@ public class Condition : ITask
         Debug.Log(predicate());
     }
 
-    public BT_Node.Status Process() => predicate()?BT_Node.Status.Success:BT_Node.Status.Failure;
+    public BT_Node.Status Process() 
+    {
+        if (predicate()) 
+        {
+            return BT_Node.Status.Success;
+        }
+        else
+        {
+            return BT_Node.Status.Failure;
+        }
+    }
 }
 public class PatrolTask : ITask
 {
-    readonly Transform enemy;
-    readonly NavMeshAgent agent;
+     Transform enemy;
+     NavMeshAgent agent;
     AIDetection AIDetection;
-    readonly List<Transform> patrolPoints;
-    readonly float patrolSpeed;
+     List<Transform> patrolPoints;
+     float patrolSpeed;
     int currentIndex;
     bool isPathCalculated;
 

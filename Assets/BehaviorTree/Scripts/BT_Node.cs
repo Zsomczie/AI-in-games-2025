@@ -13,10 +13,10 @@ public class BT_Node
 {
     public enum Status { Success, Failure, Running }
 
-    public readonly string name;
-    public readonly int priority;
+    public string name;
+    public int priority;
 
-    public  readonly List<BT_Node> children = new();
+    public  List<BT_Node> children = new();
     protected int currentchild;
 
     public BT_Node(string name = "Node", int priority = 0)
@@ -74,21 +74,21 @@ public class Selector : BT_Node
 }
 public class Leaf : BT_Node 
 {
-    readonly ITask strategy;
+     ITask task;
 
-    public Leaf(string name, ITask strategy, int priority = 0) : base(name,priority)
+    public Leaf(string name, ITask task, int priority = 0) : base(name,priority)
     {
-        this.strategy = strategy;
+        this.task = task;
     }
 
     public override Status Process() 
     {
-        return strategy.Process();
+        return task.Process();
     } 
 
     public override void Reset()
     {
-        strategy.Reset();
+        task.Reset();
     }
 }
 public class BehaviorTree : BT_Node 
@@ -149,7 +149,9 @@ public class Sequence : BT_Node
 public class PrioritySelector : Selector 
 {
     List<BT_Node> SortedChildren;
+
     List<BT_Node> sortedChildrenReadOnly => SortedChildren ??= SortChildren();
+
     protected virtual List<BT_Node> SortChildren() 
     {
         return children.OrderByDescending(x=>x.priority).ToList();
