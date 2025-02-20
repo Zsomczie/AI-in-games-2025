@@ -16,7 +16,7 @@ public class BT_Node
     public List<BT_Node> children = new List<BT_Node>();
     public int currentChild;
 
-    public BT_Node (string name)
+    public BT_Node (string name = "Node")
     {
         this.name = name;
     }
@@ -90,5 +90,30 @@ public class Sequence : BT_Node
         }
         Reset();
         return Status.Success;
+    }
+}
+
+public class Selector : BT_Node 
+{
+    public Selector(string name) : base(name) { }
+
+    public override Status Process()
+    {
+        if (currentChild<children.Count)
+        {
+            switch (children[currentChild].Process())
+            {
+                case Status.Success:
+                    Reset();
+                    return Status.Success;
+                case Status.Running:
+                    return Status.Running;
+                default:
+                    currentChild++;
+                    return Status.Running;
+            }
+        }
+        Reset();
+        return Status.Failure;
     }
 }
