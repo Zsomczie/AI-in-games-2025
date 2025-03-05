@@ -9,12 +9,12 @@ public class AIDetection : MonoBehaviour
     [SerializeField] Transform target;
     [SerializeField] Transform eyes;
     public bool playerVisible;
-    StateMachine StateMachine;
+    //StateMachine StateMachine;
     [SerializeField] float attackDistance = 1;
 
     void Start()
     {
-        StateMachine = GetComponent<StateMachine>();
+        //StateMachine = GetComponent<StateMachine>();
     }
 
     void FixedUpdate()
@@ -30,7 +30,7 @@ public class AIDetection : MonoBehaviour
                 if (hit.collider.CompareTag("Player")) 
                 {
                     playerVisible = true;
-                    StateMachine.currentState = AgentState.Chasing;
+                    //StateMachine.currentState = AgentState.Chasing;
                     Debug.DrawLine(eyes.position, hit.point,Color.cyan);
                     CheckIfCloseEnoughToAttack();
                 }
@@ -43,12 +43,13 @@ public class AIDetection : MonoBehaviour
         }
     }
 
-    void LosePlayer() 
+    public bool LosePlayer() 
     {
         if (!playerVisible)
         {
-            StateMachine.currentState = AgentState.Idle;
+            //StateMachine.currentState = AgentState.Idle;
         }
+        return true;
     }
 
     void CheckIfCloseEnoughToAttack() 
@@ -56,7 +57,7 @@ public class AIDetection : MonoBehaviour
         float distance = Vector3.Distance(target.position, transform.position);
         if (distance < attackDistance)
         {
-            StateMachine.currentState = AgentState.Attacking;
+            //StateMachine.currentState = AgentState.Attacking;
         }
     }
 }
