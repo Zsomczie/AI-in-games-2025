@@ -4,129 +4,77 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public interface ITask //also can be called strategies!!!
+
+public interface ITask //strategy
 {
     BT_Node.Status Process();
-    void Reset() 
+
+    void Reset()
     {
-        //nothing by default
+
     }
 }
-
-public class Condition : ITask 
+public class PatrolTask : ITask 
 {
-    Func<bool> predicate;
-
-    public Condition(Func<bool> predicate)
-    {
-        this.predicate = predicate;
-        Debug.Log(predicate());
-    }
-
-    public BT_Node.Status Process() 
-    {
-        if (predicate()) 
-        {
-            return BT_Node.Status.Success;
-        }
-        else
-        {
-            return BT_Node.Status.Failure;
-        }
-    }
-}
-public class PatrolTask : ITask
-{
-     Transform enemy;
-     NavMeshAgent agent;
-    AIDetection AIDetection;
-     List<Transform> patrolPoints;
-     float patrolSpeed;
+    NavMeshAgent agent;
+    Transform waypoints;
+    List<Transform> waypointList;
+    float cooldown;
     int currentIndex;
     bool isPathCalculated;
 
-    public PatrolTask(Transform enemy, NavMeshAgent agent, AIDetection AIDetection, List<Transform> patrolPoints, float patrolSpeed=2f)
+    public PatrolTask(NavMeshAgent agent, List<Transform> waypointList)
     {
-        this.enemy = enemy;
         this.agent = agent;
-        this.patrolPoints = patrolPoints;
-        this.patrolSpeed = patrolSpeed;
-        this.AIDetection= AIDetection;
+        this.waypointList = waypointList;
     }
 
     public BT_Node.Status Process() 
     {
-        Debug.Log(currentIndex);
-        if (currentIndex == patrolPoints.Count) 
+        if (currentIndex == waypointList.Count) 
         {
             return BT_Node.Status.Success;
         }
-        if (AIDetection.playerVisible)
-        {
-            return BT_Node.Status.Failure;
-        }
-        var target = patrolPoints[currentIndex];
-        agent.SetDestination(target.position);
-
-        //enemy.LookAt(target);
-
-        if (isPathCalculated&&agent.remainingDistance<0.1f) 
-        {
-            
-            currentIndex++;
-            //Debug.Log(currentIndex);
-            isPathCalculated = false;
-        }
+        var target = waypointList[currentIndex];
+        agent.SetDestination(waypointList[currentIndex].position);
 
         if (agent.pathPending)
         {
             isPathCalculated = true;
         }
 
+        if (isPathCalculated&&agent.remainingDistance<0.1f)
+        {
+            currentIndex++;
+            isPathCalculated = false;
+        }
+
+        
+
         return BT_Node.Status.Running;
     }
 
     public void Reset() 
     {
-            currentIndex = 0;
+        currentIndex = 0;
     }
 }
 
-public class ChaseTask : ITask
+public class Condition : ITask 
 {
-    AIDetection AIDetection;
-    Transform playerTarget;
-    NavMeshAgent agent;
-    public ChaseTask(AIDetection AIDetection, Transform playerTarget, NavMeshAgent agent)
+    Func<bool> conditionFunc;
+
+    public Condition(Func<bool> conditionFunc) 
     {
-        this.AIDetection = AIDetection;
-        this.playerTarget = playerTarget;
-        this.agent = agent;
+        this.conditionFunc = conditionFunc;
     }
 
     public BT_Node.Status Process() 
     {
-        agent.SetDestination(playerTarget.position);
-        if (AIDetection.playerVisible)
+        if (conditionFunc())
         {
-            return BT_Node.Status.Running;
+            return BT_Node.Status.Success;
         }
-        return BT_Node.Status.Success;
-    }
-}
-
-public class ActionTask : ITask 
-{
-    Action doSomething;
-
-    public ActionTask(Action doSomething) 
-    {
-        this.doSomething = doSomething;
-    }
-
-    public BT_Node.Status Process() 
-    {
-        doSomething();
-        return BT_Node.Status.Success;
+        return BT_Node.Status.Failure;
     }
 }
