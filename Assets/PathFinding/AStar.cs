@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class Dijkstra : MonoBehaviour
+public class AStar : MonoBehaviour
 {
     class Connection
     {
@@ -23,7 +23,7 @@ public class Dijkstra : MonoBehaviour
     struct NodeRecord
     {
         public int node, connection;
-        public float costSoFar;
+        public float costSoFar, estimatedTotalCost;
     }
 
     public GameObject[] nodes;
@@ -49,7 +49,6 @@ public class Dijkstra : MonoBehaviour
         connections.Add(new Connection(0, 5));
         connections.Add(new Connection(1, 2));
         connections.Add(new Connection(1, 3));
-        connections.Add(new Connection(1, 7));
         connections.Add(new Connection(2, 0));
         connections.Add(new Connection(3, 4));
         connections.Add(new Connection(3, 8));
@@ -59,7 +58,6 @@ public class Dijkstra : MonoBehaviour
         connections.Add(new Connection(7, 2));
         connections.Add(new Connection(8, 6));
         connections.Add(new Connection(9, 4));
-
 
         InitializeSearch();
 
@@ -80,6 +78,7 @@ public class Dijkstra : MonoBehaviour
         startRecord.node = startNode;
         startRecord.connection = -1;
         startRecord.costSoFar = 0;
+        startRecord.estimatedTotalCost = 0;
         openList.Add(startRecord);
 
         closedList.Clear();
@@ -89,6 +88,11 @@ public class Dijkstra : MonoBehaviour
         pathFindingStatus = "Initializing...";
         
         foundPath = false;
+    }
+
+    float Heuristic(int from, int to)
+    {
+        return Vector3.Distance(nodes[from].transform.position, nodes[to].transform.position);
     }
 
     private void Update()
@@ -119,7 +123,10 @@ public class Dijkstra : MonoBehaviour
                         if (indexInClosedList != -1)
                         {
                             //This node has already been processed, continue
-                            continue;
+                            endNodeRecord = closedList[indexInClosedList];
+                            if (endNodeRecord.costSoFar <= endNodeCost)
+                                continue;
+                            closedList.Remove(endNodeRecord);
                         }
                         else if (indexInOpenList != -1)
                         {
@@ -138,6 +145,7 @@ public class Dijkstra : MonoBehaviour
 
                         endNodeRecord.costSoFar = endNodeCost;
                         endNodeRecord.connection = id;
+                        endNodeRecord.estimatedTotalCost = endNodeCost + Heuristic(endNode, goalNode);
 
                         if (indexInOpenList == -1)
                         {
