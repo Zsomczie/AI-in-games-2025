@@ -106,7 +106,7 @@ public class AStar : MonoBehaviour
                 currentNode = FindSmallestOpenNode();
                 if (currentNode.node == goalNode)
                 {
-
+                    //finish this
                 }
                 else
                 {
